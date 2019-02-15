@@ -1,0 +1,24 @@
+   This is a sequence of the 3rd movement of Tchaikovsky's 6th Symphony
+for the Proteus 2 sound module. I've also used a Korg O3R/W for the tuba
+part.
+
+   All tracks play at concert pitch.
+
+  Note that:
+
+   there are various programs used in the French Horns track for
+soft, loud, solo, and section horns;
+
+   there is program-sharing in the Tremolo/Pizz track: there are
+pizzicato violins from bars 11-4 and 141-179 to and tremolo strings from bars
+78 to 137 and from 197 to the end.
+
+   You will note that string sections share MIDI channels
+in order to make this playable on one sound module (you can, of course,
+use the tuba program from the same sound module used for the other instruments).
+
+                  Gary Goldberg
+
+           National Capital Amiga Users Group
+
+                  garyg@ix.netcom.com
