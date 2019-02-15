@@ -1,0 +1,3 @@
+[submodule "LOP_database"]
+	path = LOP_database
+	url = https://github.com/qsdfo/LOP_database.git
