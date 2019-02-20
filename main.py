@@ -1,3 +1,6 @@
-from Orchestration.get_data import cashe_data
+import os
 
-cashe_data('/Users/brianmodel/Desktop/gatech/freshman/VIP/DeepScoreOrchestration/data/bouliane_aligned')
+from Orchestration.get_data import cashe_data
+from Orchestration import data_path
+
+cashe_data(os.path.join(data_path, 'bouliane_aligned'))
