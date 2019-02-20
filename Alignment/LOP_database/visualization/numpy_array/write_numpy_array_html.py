@@ -3,15 +3,11 @@
 
 import os
 import re
-
+from LOP_database import base_path
 
 def write_numpy_array_html(filename, dataname, colour_palette='blue_gradient', min_max=None, d3js_source_path=None):
     if d3js_source_path is None:
-        user_paths = os.environ['PYTHONPATH'].split(os.pathsep)
-        for user_path in user_paths:
-            if re.search('acidano', user_path):
-                d3js_source_path = os.path.join(user_path, 'acidano/visualization/d3.v3.min.js')
-                break
+        d3js_source_path = os.path.join(base_path, 'Alignment/LOP_database/visualization/d3.v3.min.js')
 
     # Colour palette
     if colour_palette == 'blue_gradient':

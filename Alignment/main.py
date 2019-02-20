@@ -6,11 +6,11 @@ import shutil
 from LOP_database.midi.read_midi import Read_midi
 from LOP_database.midi.write_midi import write_midi
 from LOP_database.utils.align_pianorolls import align_pianorolls
-
+from LOP_database import base_path
 
 if __name__ == "__main__":
     # args = sys.argv
-    args = ["", os.path.abspath(os.pardir) + "/data/bouliane"]  # Path to the dataset
+    args = ["", base_path + "/data/bouliane"]  # Path to the dataset
     # Parameters should be set arbitrarily high, greater than 100
     quantization = 100
 
