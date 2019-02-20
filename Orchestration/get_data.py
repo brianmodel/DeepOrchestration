@@ -44,7 +44,7 @@ def cashe_data(path):
                 data = Read_midi(
                     os.path.join(sample_path, file), quantization
                 ).read_file()
-                if not os.path.exists(os.mkdir(os.path.join(cashed_set_dir, sample))):
+                if not os.path.exists(os.path.join(cashed_set_dir, sample)):
                     os.mkdir(os.path.join(cashed_set_dir, sample))
                 with open(
                     os.path.join(cashed_set_dir, sample + "/" + file[:-4]), 'wb'
