@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, '/Users/brianmodel/Desktop/gatech/freshman/VIP/DeepScoreOrchestration/Alignment/')
+
 from mido import MidiFile
 from unidecode import unidecode
 from LOP_database.utils.pianoroll_processing import sum_along_instru_dim
@@ -176,17 +179,22 @@ class Read_midi(object):
 
 if __name__ == '__main__':
     from LOP_database.visualization.numpy_array.visualize_numpy import visualize_dict, visualize_dict_concat, visualize_mat
-    from LOP.Database.build_data_aux import process_folder, get_instru_and_pr_from_folder_path, simplify_instrumentation
+    from LOP_database.midi.build_data_lop_aux import process_folder, get_instru_and_pr_from_folder_path, simplify_instrumentation
     import LOP_database.utils.pianoroll_processing as pianoroll_processing
 
-    orch_path = '/Users/leo/Recherche/GitHub_Aciditeam/database/Orchestration/LOP_database_06_09_17/bouliane/3/Moussorgsky_TableauxProm(24 mes)_ORCH+REDUC+piano_orch.mid'
-    # piano_path = '/Users/leo/Recherche/GitHub_Aciditeam/database/Orchestration/LOP_database_06_09_17/liszt_classical_archives/18/_beet7_4_solo.mid'
-    quantization = 8
+    orch_path = '/Users/brianmodel/Desktop/gatech/freshman/VIP/DeepScoreOrchestration/data/bouliane/3/Moussorgsky_TableauxProm(24 mes)_ORCH+REDUC+piano_orch.mid'
+    piano_path = '/Users/brianmodel/Desktop/gatech/freshman/VIP/DeepScoreOrchestration/data/bouliane/3/Moussorgsky_TableauxProm(24 mes)_ORCH+REDUC+piano_solo.mid'
+
+    quantization = 8 # How many steps in the 'x' direction (time) a quarter note is
     start_ind = 0
     end_ind = 173
     
     pr_orch = Read_midi(orch_path, quantization).read_file()
-    for k, v in pr_orch.iteritems():
+    piano = Read_midi(piano_path, quantization).read_file()
+    for k, v in piano.items():
+        print(k)
+        print(len(v))
+        print(v[172])
         visualize_mat(v, "DEBUG", k, (start_ind, end_ind))
 
     # ########################################################

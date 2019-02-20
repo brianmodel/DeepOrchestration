@@ -57,7 +57,7 @@ def get_instru_and_pr_from_folder_path(folder_path, quantization, clip=True):
 
 
 def unmixed_instru(instru_string):
-    instru_list = re.split(ur' and ', instru_string)
+    instru_list = re.split('ur' and ', instru_string')
     return instru_list
 
 

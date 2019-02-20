@@ -14,7 +14,7 @@ def dump_to_csv(path_to_data='dump.csv', save_path='data.csv'):
         if len(mat.shape)==1:
             mat = np.expand_dims(mat, axis=1)
         list_point = mat_to_csv(mat)
-    with open(save_path, 'wb') as f_handle:
+    with open(save_path, 'w') as f_handle:
         writer = csv.writer(f_handle, delimiter=',')
         writer.writerows(list_point)
 

@@ -327,7 +327,7 @@ def write_numpy_array_html(filename, dataname, colour_palette='blue_gradient', m
 </script>
 </body>"""
 
-    with open(filename, "wb") as f:
+    with open(filename, "w") as f:
         f.write(text)
     return
 
