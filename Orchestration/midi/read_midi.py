@@ -1,19 +1,19 @@
 import sys
 from os.path import dirname, abspath
-sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
+sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
 from mido import MidiFile
 from unidecode import unidecode
-from LOP_database.utils.pianoroll_processing import sum_along_instru_dim
-from LOP_database.utils.pianoroll_processing import get_pianoroll_time
+from Orchestration.utils.pianoroll_processing import sum_along_instru_dim
+from Orchestration.utils.pianoroll_processing import get_pianoroll_time
 
-from LOP_database.utils.event_level import get_event_ind_dict, from_event_to_frame
-from LOP_database.utils.time_warping import warp_pr_aux
+from Orchestration.utils.event_level import get_event_ind_dict, from_event_to_frame
+from Orchestration.utils.time_warping import warp_pr_aux
 
 import numpy as np
 
-from LOP_database.utils.time_warping import needleman_chord_wrapper, warp_dictionnary_trace, remove_zero_in_trace
-import LOP_database.utils.unit_type as Unit_type
+from Orchestration.utils.time_warping import needleman_chord_wrapper, warp_dictionnary_trace, remove_zero_in_trace
+import Orchestration.utils.unit_type as Unit_type
 
 #######
 # Pianorolls dims are  :   TIME  *  PITCH
@@ -179,10 +179,9 @@ class Read_midi(object):
 
 
 if __name__ == '__main__':
-    from LOP_database.visualization.numpy_array.visualize_numpy import visualize_dict, visualize_dict_concat, visualize_mat
-    from LOP_database.midi.build_data_lop_aux import process_folder, get_instru_and_pr_from_folder_path, simplify_instrumentation
-    import LOP_database.utils.pianoroll_processing as pianoroll_processing
-    from LOP_database import base_path
+    from Orchestration.midi.build_data_lop_aux import process_folder, get_instru_and_pr_from_folder_path, simplify_instrumentation
+    import Orchestration.utils.pianoroll_processing as pianoroll_processing
+    from Orchestration import base_path
 
     orch_path = base_path + '/data/bouliane/3/Moussorgsky_TableauxProm(24 mes)_ORCH+REDUC+piano_orch.mid'
     piano_path = base_path + '/data/bouliane/3/Moussorgsky_TableauxProm(24 mes)_ORCH+REDUC+piano_solo.mid'
@@ -197,86 +196,3 @@ if __name__ == '__main__':
         print(k)
         print(len(v))
         print(v[172])
-        visualize_mat(v, "DEBUG", k, (start_ind, end_ind))
-
-    # ########################################################
-    # orch = sum_along_instru_dim(pr)[start_ind:end_ind] 
-    # # orch[np.nonzero(orch)] = 1
-    # orch[0, 30] = 1
-    # orch[0, 92] = 1
-    # #######################################################
-
-    # #######################################################
-    # pr_piano = Read_midi(piano_path, quantization).read_file()
-    # #######################################################
-
-    # #######################################################
-    # # Event level representation
-    # event_piano = get_event_ind_dict(pr_piano)
-    # event_orch = get_event_ind_dict(pr_orch)
-    # pr_piano = warp_pr_aux(pr_piano, event_piano)
-    # pr_orch = warp_pr_aux(pr_orch, event_orch)
-    # ########################################################
-
-    # def align_tracks(pr0, pr1, unit_type, gapopen, gapextend):
-    #     # Get trace from needleman_wunsch algorithm
-
-    #     # First extract binary representation, whatever unit_type is
-    #     pr0_binary = Unit_type.from_type_to_binary(pr0, unit_type)
-    #     pr1_binary = Unit_type.from_type_to_binary(pr1, unit_type)  
-    #     pr0_trace = sum_along_instru_dim(pr0_binary)
-    #     pr1_trace = sum_along_instru_dim(pr1_binary)
-
-    #     # Traces are computed from binaries matrices
-    #     # Traces are binary lists, 0 meaning a gap is inserted
-    #     trace_0, trace_1, this_sum_score, this_nbId, this_nbDiffs = needleman_chord_wrapper(pr0_trace, pr1_trace, gapopen, gapextend)
-
-    #     ####################################
-    #     # Wrap dictionnaries according to the traces
-    #     assert(len(trace_0) == len(trace_1)), "size mismatch"
-    #     pr0_warp = warp_dictionnary_trace(pr0, trace_0)
-    #     pr1_warp = warp_dictionnary_trace(pr1, trace_1)
-
-    #     ####################################
-    #     # Trace product
-    #     trace_prod = [e1 * e2 for (e1, e2) in zip(trace_0, trace_1)]
-    #     duration = sum(trace_prod)
-    #     if duration == 0:
-    #         return [None]*6
-    #     # Remove gaps
-    #     pr0_aligned = remove_zero_in_trace(pr0_warp, trace_prod)
-    #     pr1_aligned = remove_zero_in_trace(pr1_warp, trace_prod)
-
-    #     return pr0_aligned, trace_0, pr1_aligned, trace_1, trace_prod, duration
-
-    # pr_piano, trace_0, pr_orch, trace_1, trace_prod, duration = align_tracks(pr_piano, pr_orch, 'binary', 3, 2)
-
-    # ########################################################
-    # horn = sum_along_instru_dim({k: pr_orch[k][start_ind:end_ind] for k in [u'Horn 1', u'Horn 3']})
-    # tuba = sum_along_instru_dim({k: pr_orch[k][start_ind:end_ind] for k in [u'Tuba 1']})
-    # trumpet = sum_along_instru_dim({k: pr_orch[k][start_ind:end_ind] for k in [u'Trumpet 2', u'Trumpet 1']})
-    # trombone = sum_along_instru_dim({k: pr_orch[k][start_ind:end_ind] for k in [u'Trombone Bass', u'Trombone 1']})
-    # orch = np.concatenate([horn, tuba, trumpet, trombone], axis=1)
-    # ########################################################
-
-    # piano = sum_along_instru_dim(pr_piano)[start_ind:end_ind]
-    # piano[np.nonzero(piano)] = 1
-    # # piano[0, 30] = 1
-    # # piano[0, 92] = 1
-
-    # orch[np.nonzero(orch)] = 1
-    # piano[np.nonzero(piano)] = 1
-
-    # visualize_mat(orch, 'DEBUG', 'orch', time_indices=None)
-    # visualize_mat(piano, 'DEBUG', 'piano', time_indices=None)
-    
-    # # call(["open", "DEBUG/numpy_vis.html"])
-
-    # # pr_clip = clip_pr(pr)
-    # # pr_warped = linear_warp_pr(pr_clip, int(midifile.T_pr * 0.6))
-
-    # # write_midi(pr_warped, midifile.quantization, 'DEBUG/out.mid')
-    # # write_midi(midifile.pianoroll, midifile.quantization, 'DEBUG/out2.mid')
-    # # for name_instru in midifile.pianoroll.keys():
-    # #     np.savetxt('DEBUG/' + name_instru + '.csv', midifile.pianoroll[name_instru], delimiter=',')
-    # #     dump_to_csv('DEBUG/' + name_instru + '.csv', 'DEBUG/' + name_instru + '.csv')
