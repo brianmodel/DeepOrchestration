@@ -6,7 +6,7 @@ from Orchestration.utils.map_instrument import map_instrument
 
 from Orchestration.utils.pianoroll_processing import sum_along_instru_dim
 
-
+# Piano roll (what we create), quantization and path
 def write_midi(pr, ticks_per_beat, write_path, tempo=80):
     def pr_to_list(pr):
         # List event = (pitch, velocity, time)

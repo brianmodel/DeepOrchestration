@@ -5,15 +5,17 @@ from Orchestration.midi.read_midi import Read_midi
 from Orchestration import data_path, base_path
 
 
-def get_data():
-    # cashe = os.path.join(os.path.abspath(__file__), "cashe")
-    # if not os.path.exists(cashe):
-    #     os.mkdir(cashe)
-    #     quantization = 8
-    #     for sample in os.listdir():
-    #         print(sample)
-    # Read_midi(path, quantization)
-    pass
+def get_train_data(source="bouliane_aligned"):
+    cashe = os.path.join(base_path, "Orchestration/cashe/" + source)
+    data = []
+    for point in os.listdir(cashe):
+        point_path = os.path.join(cashe, point)
+        scores = []
+        for score in os.listdir(point_path):
+            with open(os.path.join(point_path, score), "rb") as f:
+                scores.append([pickle.load(f)])
+        data.append(scores)
+    return data
 
 
 def cashe_data(path):
@@ -47,6 +49,6 @@ def cashe_data(path):
                 if not os.path.exists(os.path.join(cashed_set_dir, sample)):
                     os.mkdir(os.path.join(cashed_set_dir, sample))
                 with open(
-                    os.path.join(cashed_set_dir, sample + "/" + file[:-4]), 'wb'
+                    os.path.join(cashed_set_dir, sample + "/" + file[:-4]), "wb"
                 ) as handle:
                     pickle.dump(data, handle)
