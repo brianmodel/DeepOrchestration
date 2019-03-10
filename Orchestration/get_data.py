@@ -1,11 +1,21 @@
 import os
 import pickle
+import numpy as np
 
 from Orchestration.midi.read_midi import Read_midi
 from Orchestration import data_path, base_path
 
 
 def get_train_data(source="bouliane_aligned"):
+    """Method for getting training data for machine learning
+    
+    Keyword Arguments:
+        source {str} -- which folder you want the data from (default: {"bouliane_aligned"})
+    
+    Returns:
+        dict -- the training data
+    """
+
     cashe = os.path.join(base_path, "Orchestration/cashe/" + source)
     data = []
     for point in os.listdir(cashe):
@@ -13,7 +23,17 @@ def get_train_data(source="bouliane_aligned"):
         scores = []
         for score in os.listdir(point_path):
             with open(os.path.join(point_path, score), "rb") as f:
-                scores.append([pickle.load(f)])
+                part = pickle.load(f)
+                # Have to correct for some piano scores having more than 1 piano part
+                if 'piano_solo' in os.path.join(point_path, score):
+                    total = None
+                    for key in part:
+                        if total is None:
+                            total = part[key]
+                        else:
+                            np.add(total, part[key])
+                    part = {'Kboard': total}
+                scores.append(part)
         data.append(scores)
     return data
 
