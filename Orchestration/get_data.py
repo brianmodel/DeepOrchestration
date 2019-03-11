@@ -17,15 +17,17 @@ def get_train_data(source="bouliane_aligned"):
     """
 
     cashe = os.path.join(base_path, "Orchestration/cashe/" + source)
-    data = []
+    # data = []
+    X = []
+    y = []
     for point in os.listdir(cashe):
         point_path = os.path.join(cashe, point)
-        scores = []
+        # scores = []
         for score in os.listdir(point_path):
             with open(os.path.join(point_path, score), "rb") as f:
                 part = pickle.load(f)
                 # Have to correct for some piano scores having more than 1 piano part
-                if 'piano_solo' in os.path.join(point_path, score):
+                if 'solo' in os.path.join(point_path, score):
                     total = None
                     for key in part:
                         if total is None:
@@ -33,10 +35,38 @@ def get_train_data(source="bouliane_aligned"):
                         else:
                             np.add(total, part[key])
                     part = {'Kboard': total}
-                scores.append(part)
-        data.append(scores)
-    return data
+                    X.append(total)
+                else:
+                    y.append(part)
+                # scores.append(part)
+        # data.append(scores)
+    y = vectorize_orch(y)
+    return X, y
 
+def vectorize_orch(data):
+    """Method that vectorizes the orchestra data from the dictionary
+    
+    Arguments:
+        data {arr} -- orchestration array containing dictionaries
+    """
+    vect = []
+    order = set()
+    for orch in data:
+        for instrument in orch:
+            order.add(instrument)
+    order = list(order)
+    order = sorted(order)
+    
+    for orch in data:
+        vect.append([])
+        nan = np.zeros(orch[list(orch.keys())[0]].shape)
+        for instrument in order:
+            if (instrument in orch):
+                vect[-1].append(orch[instrument])
+            else:
+                vect[-1].append(nan)
+    return vect
+    
 
 def cashe_data(path):
     """Method that cashes all the parsed midi files from a certain
