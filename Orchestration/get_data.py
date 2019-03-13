@@ -17,12 +17,10 @@ def get_train_data(source="bouliane_aligned"):
     """
 
     cashe = os.path.join(base_path, "Orchestration/cashe/" + source)
-    # data = []
     X = []
     y = []
     for point in os.listdir(cashe):
         point_path = os.path.join(cashe, point)
-        # scores = []
         for score in os.listdir(point_path):
             with open(os.path.join(point_path, score), "rb") as f:
                 part = pickle.load(f)
@@ -38,8 +36,6 @@ def get_train_data(source="bouliane_aligned"):
                     X.append(total)
                 else:
                     y.append(part)
-                # scores.append(part)
-        # data.append(scores)
     y = vectorize_orch(y)
     return X, y
 

@@ -3,3 +3,9 @@ mido==1.2.9
 numpy==1.16.1
 scipy==1.2.1
 Unidecode==1.0.23
+torch==0.4.1
+torchvision==0.2.2.post3
+six==1.11.0
+numpy==1.16.1
+numpydoc==0.8.0
+
