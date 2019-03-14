@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 
 from Orchestration.midi.read_midi import Read_midi
+from Orchestration.midi.write_midi import write_midi
 from Orchestration import data_path, base_path
 
 
@@ -25,44 +26,73 @@ def get_train_data(source="bouliane_aligned"):
             with open(os.path.join(point_path, score), "rb") as f:
                 part = pickle.load(f)
                 # Have to correct for some piano scores having more than 1 piano part
-                if 'solo' in os.path.join(point_path, score):
+                if "solo" in os.path.join(point_path, score):
                     total = None
                     for key in part:
                         if total is None:
                             total = part[key]
                         else:
                             np.add(total, part[key])
-                    part = {'Kboard': total}
+                    part = {"Kboard": total}
                     X.append(total)
                 else:
                     y.append(part)
-    y = vectorize_orch(y)
+    y = vectorize_all_orch(y)
     return X, y
 
+
 def vectorize_orch(data):
-    """Method that vectorizes the orchestra data from the dictionary
+    order = read_order()
+    vect = []
+    for instrument in order:
+        vect.append(data[instrument])
+    return vect
+
+
+def vectorize_all_orch(data):
+    """Method that vectorizes ALL the orchestra data from the dictionary
     
     Arguments:
         data {arr} -- orchestration array containing dictionaries
     """
     vect = []
-    order = set()
-    for orch in data:
-        for instrument in orch:
-            order.add(instrument)
-    order = list(order)
-    order = sorted(order)
-    
+    if os.path.isfile(os.path.join(base_path, "Orchestration/cashe/order")):
+        order = read_order()
+    else:
+        order = set()
+        for orch in data:
+            for instrument in orch:
+                order.add(instrument)
+        order = list(order)
+        order = sorted(order)
+        cashe_order(order)
+
     for orch in data:
         vect.append([])
         nan = np.zeros(orch[list(orch.keys())[0]].shape)
         for instrument in order:
-            if (instrument in orch):
+            if instrument in orch:
                 vect[-1].append(orch[instrument])
             else:
                 vect[-1].append(nan)
     return vect
-    
+
+
+def devectorize_orch(data):
+    orch = {}
+    order = read_order()
+    for i in range(len(order)):
+        orch[order[i]] = data[i]
+    return orch    
+
+
+def vect_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
+    pr = devectorize_orch(data)
+    write_midi(pr, 8, output_path)
+
+def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid"):
+    write_midi({'Kboard': data[0]}, 8, output_path)
+
 
 def cashe_data(path):
     """Method that cashes all the parsed midi files from a certain
@@ -98,3 +128,14 @@ def cashe_data(path):
                     os.path.join(cashed_set_dir, sample + "/" + file[:-4]), "wb"
                 ) as handle:
                     pickle.dump(data, handle)
+
+
+def cashe_order(order):
+    with open(os.path.join(base_path, "Orchestration/cashe/order"), "wb") as handle:
+        pickle.dump(order, handle)
+
+
+def read_order():
+    with open(os.path.join(base_path, "Orchestration/cashe/order"), "rb") as handle:
+        order = pickle.load(handle)
+    return order
