@@ -90,7 +90,7 @@ def vect_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.m
     pr = devectorize_orch(data)
     write_midi(pr, 8, output_path)
 
-def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid"):
+def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
     write_midi({'Kboard': data[0]}, 8, output_path)
 
 
