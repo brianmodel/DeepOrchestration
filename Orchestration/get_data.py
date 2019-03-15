@@ -42,6 +42,15 @@ def get_train_data(source="bouliane_aligned"):
 
 
 def vectorize_orch(data):
+    """Method to convert orchestra to a tensor
+    
+    Arguments:
+        data {dict} -- orchestra dictionary
+    
+    Returns:
+        np.array -- tensor representation of the orchestra
+    """
+
     order = read_order()
     vect = []
     for instrument in order:
@@ -79,6 +88,15 @@ def vectorize_all_orch(data):
 
 
 def devectorize_orch(data):
+    """converting orchestra tensor into a dictionary
+    
+    Arguments:
+        data {np.array} -- orchestra tensor
+    
+    Returns:
+        dict -- dictionary representation of orchestra
+    """
+
     orch = {}
     order = read_order()
     for i in range(len(order)):
@@ -86,11 +104,29 @@ def devectorize_orch(data):
     return orch    
 
 
-def vect_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
+def orch_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
+    """Method to convert orchestra tensor to midi
+    
+    Arguments:
+        data {np.array} -- orchestration matrix
+    
+    Keyword Arguments:
+        output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
+    """
+
     pr = devectorize_orch(data)
     write_midi(pr, 8, output_path)
 
 def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
+    """Helper to convert piano matrix to midi
+    
+    Arguments:
+        data {np.array} -- piano roll matrix
+    
+    Keyword Arguments:
+        output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
+    """
+
     write_midi({'Kboard': data[0]}, 8, output_path)
 
 
@@ -131,11 +167,23 @@ def cashe_data(path):
 
 
 def cashe_order(order):
+    """Method to cashe the order of instruments in orchestration
+    
+    Arguments:
+        order {list} -- order of instruments in orchestration
+    """
+
     with open(os.path.join(base_path, "Orchestration/cashe/order"), "wb") as handle:
         pickle.dump(order, handle)
 
 
 def read_order():
+    """Helper method to get the order of instruments
+    
+    Returns:
+        list -- order of the instruments
+    """
+
     with open(os.path.join(base_path, "Orchestration/cashe/order"), "rb") as handle:
         order = pickle.load(handle)
     return order
