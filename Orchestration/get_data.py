@@ -2,6 +2,8 @@ import os
 import pickle
 import numpy as np
 
+import torch
+
 from Orchestration.midi.read_midi import Read_midi
 from Orchestration.midi.write_midi import write_midi
 from Orchestration import data_path, base_path
@@ -40,6 +42,11 @@ def get_train_data(source="bouliane_aligned"):
     y = vectorize_all_orch(y)
     return X, y
 
+def piano_roll_to_tensor(pr):
+    return torch.as_tensor(pr)
+
+def orchestra_to_tensor(orch):
+    pass
 
 def vectorize_orch(data):
     """Method to convert orchestra to a tensor

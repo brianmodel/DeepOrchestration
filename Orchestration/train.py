@@ -1,5 +1,5 @@
 from Orchestration.get_data import get_train_data
-from torch.nn import nn
+from torch import nn
 
 def train():
     X, y = get_train_data()
