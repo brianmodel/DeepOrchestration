@@ -19,34 +19,47 @@ def get_train_data(source="bouliane_aligned"):
         dict -- the training data
     """
 
-    cashe = os.path.join(base_path, "Orchestration/cashe/" + source)
-    X = []
-    y = []
-    for point in os.listdir(cashe):
-        point_path = os.path.join(cashe, point)
-        for score in os.listdir(point_path):
-            with open(os.path.join(point_path, score), "rb") as f:
-                part = pickle.load(f)
-                # Have to correct for some piano scores having more than 1 piano part
-                if "solo" in os.path.join(point_path, score):
-                    total = None
-                    for key in part:
-                        if total is None:
-                            total = part[key]
-                        else:
-                            np.add(total, part[key])
-                    part = {"Kboard": total}
-                    X.append(total)
-                else:
-                    y.append(part)
-    y = vectorize_all_orch(y)
-    return X, y
+    if os.path.isfile(os.path.join(base_path, "Orchestration/cashe/data")):
+        with open(os.path.join(base_path, "Orchestration/cashe/data"), "rb") as handle:
+            data = pickle.load(handle)
+        return data
+
+    else:
+        cashe = os.path.join(base_path, "Orchestration/cashe/" + source)
+        X = []
+        y = []
+        for point in os.listdir(cashe):
+            point_path = os.path.join(cashe, point)
+            for score in os.listdir(point_path):
+                with open(os.path.join(point_path, score), "rb") as f:
+                    part = pickle.load(f)
+                    # Have to correct for some piano scores having more than 1 piano part
+                    if "solo" in os.path.join(point_path, score):
+                        total = None
+                        for key in part:
+                            if total is None:
+                                total = part[key]
+                            else:
+                                np.add(total, part[key])
+                        part = {"Kboard": total}
+                        X.append(total)
+                    else:
+                        y.append(part)
+        y = matrix_orch(y)
+        y = vectorize_orch(y)
+        with open(os.path.join(base_path, "Orchestration/cashe/data"), "wb") as handle:
+            data = [X, y]
+            pickle.dump(data, handle)
+        return X, y
+
 
 def piano_roll_to_tensor(pr):
     return torch.as_tensor(pr)
 
+
 def orchestra_to_tensor(orch):
     pass
+
 
 def vectorize_orch(data):
     """Method to convert orchestra to a tensor
@@ -65,8 +78,20 @@ def vectorize_orch(data):
     return vect
 
 
-def vectorize_all_orch(data):
-    """Method that vectorizes ALL the orchestra data from the dictionary
+def vectorize_orch(data):
+    vect = []
+    for orch in data:
+        deep_y = [[] for i in range(len(orch[0]))]
+        for inst in orch:
+            for j in range(len(inst)):
+                deep_y[j].extend(inst[j])
+        vect.append(np.array(deep_y))
+        print("HERE")
+    return vect
+
+
+def matrix_orch(data):
+    """Method that puts ALL the orchestra data into a matrix from the dictionary
     
     Arguments:
         data {arr} -- orchestration array containing dictionaries
@@ -103,12 +128,19 @@ def devectorize_orch(data):
     Returns:
         dict -- dictionary representation of orchestra
     """
-
+    mat = [[] for i in range(74)]
+    for row in data:
+        for i in range(len(mat)):
+            mat[i].append(row[i * 128 : (i + 1) * 128])
+    mat = np.array(mat)
+    mat = mat.astype(int)
+    print("SHAPE ", mat.shape)
+    print("First Inst ", mat[0].shape)
     orch = {}
     order = read_order()
     for i in range(len(order)):
-        orch[order[i]] = data[i]
-    return orch    
+        orch[order[i]] = mat[i]
+    return orch
 
 
 def orch_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
@@ -124,6 +156,7 @@ def orch_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.m
     pr = devectorize_orch(data)
     write_midi(pr, 8, output_path)
 
+
 def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
     """Helper to convert piano matrix to midi
     
@@ -134,7 +167,7 @@ def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.
         output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
     """
 
-    write_midi({'Kboard': data[0]}, 8, output_path)
+    write_midi({"Kboard": data}, 8, output_path)
 
 
 def cashe_data(path):

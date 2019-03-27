@@ -2,33 +2,45 @@ import os
 import numpy as np
 import random
 
-from Orchestration.get_data import get_train_data, orch_to_midi, devectorize_orch
+from Orchestration.get_data import (
+    get_train_data,
+    orch_to_midi,
+    devectorize_orch,
+    piano_to_midi,
+)
 from Orchestration.midi import read_midi, write_midi
 from Orchestration import data_path, base_path
 from Orchestration.learn import learn
-from seq2seq.models import SimpleSeq2Seq
+
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from numpy import array
+from keras.models import load_model
 
 X, y = get_train_data()
-# print(X[0].shape)
-# print(y[0][0].shape)
+X_test = X[1]
+y_test = y[1]
 
-model = SimpleSeq2Seq(
-    input_shape=(1, 111),
-    hidden_dim=10,
-    output_length=111,
-    # output_dim=(74, 111, 128),
-    output_dim=9472,
-    depth=(4, 5),
-)
-X[0] = np.append(X[0], np.zeros(128))
-deep_y = [[] for i in range(len(y[0][0]))]
-for inst in y[0]:
-    for j in range(len(inst)):
-        deep_y[j].extend(inst[j])
-deep_y = np.array(deep_y)
+if not os.path.isfile(os.path.join(base_path, "lstm_model.h5")):
+    X = X[0]
+    y = y[0][:-1]
+    X = X.reshape(X.shape[0], 1, 128)
+    y = y.reshape(y.shape[0], 1, 9472)
 
-model.compile(loss="mse", optimizer="rmsprop")
-model.fit(X[0].reshape(1, 111, 128), deep_y, verbose=1)
-model.save_weights("model_weights.h5")
+    model = Sequential()
+    model.add(LSTM(10, input_shape=(1, 128), return_sequences=True))
+    model.add(Dense(9472, activation="linear"))
+    model.compile(loss="mse", optimizer="adam")
+    model.fit(X, y, epochs=500, verbose=1)
+    model.save("lstm_model.h5")
 
-# learn()
+model = load_model("lstm_model.h5")
+X_test = X_test.reshape(X_test.shape[0], 1, 128)
+preds = model.predict(X_test)
+preds = preds.reshape(preds.shape[0], preds.shape[2])
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[2])
+# print(X_test)
+# print(X_test.shape)
+piano_to_midi(X_test, os.path.join(base_path, "Orchestration/test.mid"))
+orch_to_midi(preds, os.path.join(base_path, "Orchestration/pred.mid"))
