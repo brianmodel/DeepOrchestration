@@ -1,23 +1,19 @@
-import torch
-import torch.nn as nn
-from torch.autograd import Variable
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, LSTM, CuDNNLSTM, RepeatVector
 
-class RNN(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
 
-        self.hidden_size = hidden_size
-
-        self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(input_size + hidden_size, output_size)
-        self.softmax = nn.LogSoftmax()
-
-    def forward(self, input, hidden):
-        combined = torch.cat((input, hidden), 1)
-        hidden = self.i2h(combined)
-        output = self.i2o(combined)
-        output = self.softmax(output)
-        return output, hidden
-
-    def initHidden(self):
-        return Variable(torch.zeros(1, self.hidden_size))
+def create_model():
+    model = Sequential()
+    # Hard coding in numbers right now, not too good
+    model.add(Dense(110, input_shape=[1, 128]))
+    model.add(RepeatVector(74))
+    model.add(LSTM(128, activation="relu"))
+    model.add(LSTM(128, activation="relu"))
+    model.add(Dense(32, activation="relu"))
+    model.add(Dense(74, activation="softmax"))
+    opt = tf.keras.optimizers.Adam(lr=1e-3, decay=1e-5)
+    model.compile(
+        loss="sparse_categorical_crossentropy", optimizer=opt, metric=["accuracy"]
+    )
+    return model
