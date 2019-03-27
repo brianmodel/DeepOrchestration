@@ -13,8 +13,7 @@ X, y = get_train_data()
 # print(y[0][0].shape)
 
 model = SimpleSeq2Seq(
-    # input_dim=1,
-    batch_input_shape=(1, 111, 128),
+    input_shape=(1, 111),
     hidden_dim=10,
     output_length=111,
     # output_dim=(74, 111, 128),
