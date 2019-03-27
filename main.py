@@ -1,5 +1,7 @@
 import os
 import numpy as np
+import random
+
 from Orchestration.get_data import get_train_data, orch_to_midi, devectorize_orch
 from Orchestration.midi import read_midi, write_midi
 from Orchestration import data_path, base_path
@@ -28,6 +30,6 @@ deep_y = np.array(deep_y)
 
 model.compile(loss="mse", optimizer="rmsprop")
 model.fit(X[0].reshape(1, 111, 128), deep_y, verbose=1)
-model.save_weights('model_weights.h5')
+model.save_weights("model_weights.h5")
 
 # learn()
