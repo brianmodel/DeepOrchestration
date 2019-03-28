@@ -1,84 +1,129 @@
 import torch
 import torch.nn as nn
-from torch import optim
-import torch.nn.functional as F
+from get_data import get_train_data
+#import matplotlib.pyplot as plt
 
-from Orchestration import device
+#####################
+# Set parameters
+#####################
 
+# Data params
+noise_var = 0
+num_datapoints = 100
+test_size = 0.2
+num_train = int((1-test_size) * num_datapoints)
 
-class EncoderRNN(nn.Module):
-    def __init__(self, input_size, hidden_size):
-        super(EncoderRNN, self).__init__()
-        self.hidden_size = hidden_size
+# Network params
+input_size = 20
+# If `per_element` is True, then LSTM reads in one timestep at a time.
+per_element = False
+if per_element:
+    lstm_input_size = 1
+else:
+    lstm_input_size = input_size
+# size of hidden layers
+h1 = 32
+output_dim = 1
+num_layers = 2
+learning_rate = 1e-3
+num_epochs = 500
+dtype = torch.float
 
-        self.embedding = nn.Embedding(input_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size)
+#####################
+# Generate data
+#####################
+X_train, Y_train = get_train_data()
 
-    def forward(self, input, hidden):
-        embedded = self.embedding(input).view(1, 1, -1)
-        output = embedded
-        output, hidden = self.gru(output, hidden)
-        return output, hidden
+# make training and test sets in torch
+X_train = torch.from_numpy(data.X_train).type(torch.Tensor)
+X_test = torch.from_numpy(data.X_test).type(torch.Tensor)
+y_train = torch.from_numpy(data.y_train).type(torch.Tensor).view(-1)
+y_test = torch.from_numpy(data.y_test).type(torch.Tensor).view(-1)
 
-    def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+X_train = X_train.view([input_size, -1, 1])
+X_test = X_test.view([input_size, -1, 1])
 
+#####################
+# Build model
+#####################
 
-class DecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size):
-        super(DecoderRNN, self).__init__()
-        self.hidden_size = hidden_size
+# Here we define our model as a class
+class LSTM(nn.Module):
 
-        self.embedding = nn.Embedding(output_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size)
-        self.out = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.LogSoftmax(dim=1)
+    def __init__(self, input_dim, hidden_dim, batch_size, output_dim=1,
+                    num_layers=2):
+        super(LSTM, self).__init__()
+        self.input_dim = input_dim
+        self.hidden_dim = hidden_dim
+        self.batch_size = batch_size
+        self.num_layers = num_layers
 
-    def forward(self, input, hidden):
-        output = self.embedding(input).view(1, 1, -1)
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
-        output = self.softmax(self.out(output[0]))
-        return output, hidden
+        # Define the LSTM layer
+        self.lstm = nn.LSTM(self.input_dim, self.hidden_dim, self.num_layers)
 
-    def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+        # Define the output layer
+        self.linear = nn.Linear(self.hidden_dim, output_dim)
 
+    def init_hidden(self):
+        # This is what we'll initialise our hidden state as
+        return (torch.zeros(self.num_layers, self.batch_size, self.hidden_dim),
+                torch.zeros(self.num_layers, self.batch_size, self.hidden_dim))
 
-class AttnDecoderRNN(nn.Module):
-    def __init__(self, hidden_size, output_size, dropout_p=0.1, max_length=10):
-        super(AttnDecoderRNN, self).__init__()
-        self.hidden_size = hidden_size
-        self.output_size = output_size
-        self.dropout_p = dropout_p
-        self.max_length = max_length
+    def forward(self, input):
+        # Forward pass through LSTM layer
+        # shape of lstm_out: [input_size, batch_size, hidden_dim]
+        # shape of self.hidden: (a, b), where a and b both
+        # have shape (num_layers, batch_size, hidden_dim).
+        lstm_out, self.hidden = self.lstm(input.view(len(input), self.batch_size, -1))
 
-        self.embedding = nn.Embedding(self.output_size, self.hidden_size)
-        self.attn = nn.Linear(self.hidden_size * 2, self.max_length)
-        self.attn_combine = nn.Linear(self.hidden_size * 2, self.hidden_size)
-        self.dropout = nn.Dropout(self.dropout_p)
-        self.gru = nn.GRU(self.hidden_size, self.hidden_size)
-        self.out = nn.Linear(self.hidden_size, self.output_size)
+        # Only take the output from the final timetep
+        # Can pass on the entirety of lstm_out to the next layer if it is a seq2seq prediction
+        y_pred = self.linear(lstm_out[-1].view(self.batch_size, -1))
+        return y_pred.view(-1)
 
-    def forward(self, input, hidden, encoder_outputs):
-        embedded = self.embedding(input).view(1, 1, -1)
-        embedded = self.dropout(embedded)
+model = LSTM(lstm_input_size, h1, batch_size=num_train, output_dim=output_dim, num_layers=num_layers)
 
-        attn_weights = F.softmax(
-            self.attn(torch.cat((embedded[0], hidden[0]), 1)), dim=1
-        )
-        attn_applied = torch.bmm(
-            attn_weights.unsqueeze(0), encoder_outputs.unsqueeze(0)
-        )
+loss_fn = torch.nn.MSELoss(size_average=False)
 
-        output = torch.cat((embedded[0], attn_applied[0]), 1)
-        output = self.attn_combine(output).unsqueeze(0)
+optimiser = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
+#####################
+# Train model
+#####################
 
-        output = F.log_softmax(self.out(output[0]), dim=1)
-        return output, hidden, attn_weights
+hist = np.zeros(num_epochs)
 
-    def initHidden(self):
-        return torch.zeros(1, 1, self.hidden_size, device=device)
+for t in range(num_epochs):
+    # Initialise hidden state
+    # Don't do this if you want your LSTM to be stateful
+    model.hidden = model.init_hidden()
+
+    # Forward pass
+    y_pred = model(X_train)
+
+    loss = loss_fn(y_pred, y_train)
+    if t % 100 == 0:
+        print("Epoch ", t, "MSE: ", loss.item())
+    hist[t] = loss.item()
+
+    # Zero out gradient, else they will accumulate between epochs
+    optimiser.zero_grad()
+
+    # Backward pass
+    loss.backward()
+
+    # Update parameters
+    optimiser.step()
+
+#####################
+# Plot preds and performance
+#####################
+
+plt.plot(y_pred.detach().numpy(), label="Preds")
+plt.plot(y_train.detach().numpy(), label="Data")
+plt.legend()
+plt.show()
+
+plt.plot(hist, label="Training loss")
+plt.legend()
+plt.show()
