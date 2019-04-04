@@ -133,10 +133,10 @@ def devectorize_orch(data):
         for i in range(len(mat)):
             mat[i].append(row[i * 128 : (i + 1) * 128])
             for j in range(len(mat[i][-1])):
-                mat[i][-1][j] *= 20
-                if mat[i][-1][j] < 0:
+                if mat[i][-1][j] < 25:
                     mat[i][-1][j] = 0
-                elif mat[i][-1][j] > 127:
+                mat[i][-1][j] *= 20
+                if mat[i][-1][j] > 127:
                     mat[i][-1][j] = 127
     mat = np.array(mat)
     mat = mat.astype(int)

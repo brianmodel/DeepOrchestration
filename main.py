@@ -44,8 +44,9 @@ if not os.path.isfile(os.path.join(base_path, "lstm_model.h5")):
     model.fit(X, y, epochs=500, verbose=1)
     model.save("lstm_model.h5")
 
-X = X[4]
-y = y[4]
+X = X[3]
+y = y[3]
+y = y[:-4]
 preds = predict(X)
 piano_to_midi(X, os.path.join(base_path, "Orchestration/test.mid"))
 orch_to_midi(preds, os.path.join(base_path, "Orchestration/pred.mid"))
