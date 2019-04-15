@@ -56,8 +56,6 @@ class MultipleRNN:
             index = int(random.random() * len(X))
             X_train = X[index].reshape(X[index].shape[0], 1, 128)
             y_train = y[index].reshape(y[index].shape[0], 1, 128)
-            print(X_train.shape)
-            print(y_train.shape)
             yield X_train, y_train
 
     def _new_model_factory(self):
