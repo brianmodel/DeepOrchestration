@@ -8,8 +8,9 @@ from Orchestration import data_path, base_path
 
 from keras.models import Sequential
 from keras.layers import Dense
-from keras.layers import LSTM
+from keras.layers import LSTM, Dropout
 from keras.models import load_model
+from keras.callbacks import ModelCheckpoint
 
 
 class MultipleRNN:
@@ -21,42 +22,52 @@ class MultipleRNN:
             y_inst = []
             for orch in y:
                 y_inst.append(orch[inst])
-            self.train(inst, X, y)
+            self.train(inst, X, y_inst)
 
-    # have an array of a single instrument and the piano roll. Train on that
     def train(self, inst, X, y):
         model = self._new_model_factory()
+        epochs = 100
         print("NEW INSTRUMENT: ", inst)
-        print("---------------------------------------------------------------")
-        model.fit(X, y, epochs=500, verbose=1)
+        print(
+            "--------------------------------------------------------------------------------"
+        )
+        checkpoint = ModelCheckpoint(
+            "models/checkpoints/" + inst.strip() + "-checkpoint-{epoch:02d}.hdf5",
+            monitor="val_acc",
+            verbose=1,
+            save_best_only=True,
+            mode="max",
+        )
+        callbacks_list = [checkpoint]
+
+        model.fit_generator(
+            MultipleRNN.generator_sample(X, y),
+            steps_per_epoch=200,
+            epochs=500,
+            verbose=1,
+            callbacks=callbacks_list,
+        )
         self.models[inst] = model
         model.save("models/{}.h5".format(inst))
+
+    @staticmethod
+    def generator_sample(X, y):
+        while True:
+            index = int(random.random() * len(X))
+            X_train = X[index].reshape(X[index].shape[0], 1, 128)
+            y_train = y[index].reshape(y[index].shape[0], 1, 128)
+            print(X_train.shape)
+            print(y_train.shape)
+            yield X_train, y_train
 
     def _new_model_factory(self):
         model = Sequential()
         model.add(LSTM(30, input_shape=(1, 128), return_sequences=True))
         model.add(Dense(30, activation="relu"))
         model.add(Dense(128, activation="linear"))
-        model.compile(loss="mse", optimizer="adam")
+        model.add(Dropout(rate=0.5))
+        model.compile(loss="mse", optimizer="adam", metrics=["accuracy"])
         return model
-
-
-# X, y = get_train_data()
-# print(X, y)
-# if not os.path.isfile(os.path.join(base_path, "lstm_model.h5")):
-#     X = X[3]
-#     y = y[3]
-#     y = y[:-4]
-#     X = X.reshape(X.shape[0], 1, 128)
-#     y = y.reshape(y.shape[0], 1, 9472)
-
-# X = X[3]
-# y = y[3]
-# y = y[:-4]
-# preds = predict(X)
-# piano_to_midi(X, os.path.join(base_path, "Orchestration/test.mid"))
-# orch_to_midi(preds, os.path.join(base_path, "Orchestration/pred.mid"))
-# orch_to_midi(y, os.path.join(base_path, "Orchestration/original_orch.mid"))
 
 
 def predict(model, X):
