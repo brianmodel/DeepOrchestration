@@ -9,7 +9,7 @@ from Orchestration.midi.write_midi import write_midi
 from Orchestration import data_path, base_path
 
 
-def get_train_data(source="bouliane_aligned"):
+def get_train_data(source="bouliane_aligned", fix=True):
     """Method for getting training data for machine learning
     
     Keyword Arguments:
@@ -52,7 +52,8 @@ def get_train_data(source="bouliane_aligned"):
             else:
                 for j in range(diff):
                     X[i] = X[i][:-1, :]
-    add_instruments(y)
+    if fix:
+        add_instruments(y)
     return X, y
 
 

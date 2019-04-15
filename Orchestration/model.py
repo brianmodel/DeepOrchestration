@@ -24,8 +24,14 @@ class MultipleRNN:
                 y_inst.append(orch[inst])
             self.train(inst, X, y_inst)
 
+    def predict(self, X, y, inst=None):
+        if inst != None:
+            pass
+        else:
+            pass
+
     def train(self, inst, X, y):
-        model = self._new_model_factory()
+        model = MultipleRNN._new_model_factory()
         epochs = 100
         print("NEW INSTRUMENT: ", inst)
         print(
@@ -57,8 +63,8 @@ class MultipleRNN:
             X_train = X[index].reshape(X[index].shape[0], 1, 128)
             y_train = y[index].reshape(y[index].shape[0], 1, 128)
             yield X_train, y_train
-
-    def _new_model_factory(self):
+    @staticmethod
+    def _new_model_factory():
         model = Sequential()
         model.add(LSTM(30, input_shape=(1, 128), return_sequences=True))
         model.add(Dense(30, activation="relu"))
@@ -66,6 +72,27 @@ class MultipleRNN:
         model.add(Dropout(rate=0.5))
         model.compile(loss="mse", optimizer="adam", metrics=["accuracy"])
         return model
+    
+    @staticmethod
+    def train_classifier():
+        X, y = get_train_data(fix=False)
+        classifier = ClassifierRNN()
+        classifier.fit(X, y)
+
+
+class ClassifierRNN:
+    def __init__(self):
+        pass
+
+    def fit(self, X, y):
+        self.X = X
+        insts = set()
+        for orch in y:
+            for inst in orch.keys():
+                insts.add(inst)
+        insts = list(insts)
+
+
 
 
 def predict(model, X):
