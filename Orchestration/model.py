@@ -31,6 +31,7 @@ class MultipleRNN:
         print(
             "--------------------------------------------------------------------------------"
         )
+        '''
         checkpoint = ModelCheckpoint(
             "models/checkpoints/" + inst.strip() + "-checkpoint-{epoch:02d}.hdf5",
             monitor="val_acc",
@@ -39,16 +40,15 @@ class MultipleRNN:
             mode="max",
         )
         callbacks_list = [checkpoint]
-
+        '''
         model.fit_generator(
             MultipleRNN.generator_sample(X, y),
-            steps_per_epoch=200,
+            steps_per_epoch=300,
             epochs=500,
             verbose=1,
-            callbacks=callbacks_list,
         )
         self.models[inst] = model
-        model.save("models/{}.h5".format(inst))
+        model.save(base_path + "/Orchestration/models/{}.h5".format(inst.replace(' ', '')))
 
     @staticmethod
     def generator_sample(X, y):
