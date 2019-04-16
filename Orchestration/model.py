@@ -2,7 +2,12 @@ import os
 import numpy as np
 import random
 
-from Orchestration.get_data import get_train_data, orch_to_midi, piano_to_midi
+from Orchestration.get_data import (
+    get_train_data,
+    inst_to_midi,
+    piano_to_midi,
+    orch_to_midi,
+)
 from Orchestration.midi import read_midi, write_midi
 from Orchestration import data_path, base_path
 
@@ -24,9 +29,13 @@ class MultipleRNN:
                 y_inst.append(orch[inst])
             self.train(inst, X, y_inst)
 
-    def predict(self, X, y, inst=None):
+    def predict(self, X, inst=None):
         if inst != None:
-            pass
+            model = load_model(base_path + "/Orchestration/models/{}.h5".format(inst))
+            X = X.reshape(X.shape[0], 1, 128)
+            preds = model.predict(X)
+            preds = preds.reshape(preds.shape[0], preds.shape[2])
+            inst_to_midi(preds, inst)
         else:
             pass
 
@@ -37,16 +46,6 @@ class MultipleRNN:
         print(
             "--------------------------------------------------------------------------------"
         )
-        '''
-        checkpoint = ModelCheckpoint(
-            "models/checkpoints/" + inst.strip() + "-checkpoint-{epoch:02d}.hdf5",
-            monitor="val_acc",
-            verbose=1,
-            save_best_only=True,
-            mode="max",
-        )
-        callbacks_list = [checkpoint]
-        '''
         model.fit_generator(
             MultipleRNN.generator_sample(X, y),
             steps_per_epoch=300,
@@ -54,7 +53,9 @@ class MultipleRNN:
             verbose=1,
         )
         self.models[inst] = model
-        model.save(base_path + "/Orchestration/models/{}.h5".format(inst.replace(' ', '')))
+        model.save(
+            base_path + "/Orchestration/models/{}.h5".format(inst.replace(" ", ""))
+        )
 
     @staticmethod
     def generator_sample(X, y):
@@ -63,6 +64,7 @@ class MultipleRNN:
             X_train = X[index].reshape(X[index].shape[0], 1, 128)
             y_train = y[index].reshape(y[index].shape[0], 1, 128)
             yield X_train, y_train
+
     @staticmethod
     def _new_model_factory():
         model = Sequential()
@@ -72,7 +74,7 @@ class MultipleRNN:
         model.add(Dropout(rate=0.5))
         model.compile(loss="mse", optimizer="adam", metrics=["accuracy"])
         return model
-    
+
     @staticmethod
     def train_classifier():
         X, y = get_train_data(fix=False)
@@ -91,8 +93,6 @@ class ClassifierRNN:
             for inst in orch.keys():
                 insts.add(inst)
         insts = list(insts)
-
-
 
 
 def predict(model, X):

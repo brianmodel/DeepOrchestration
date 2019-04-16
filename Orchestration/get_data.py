@@ -69,30 +69,28 @@ def add_instruments(y):
                 shape = y[i][list(y[i].keys())[0]].shape
                 y[i][inst] = np.zeros(shape)
 
+def filter(data):
+    data = data.astype(int)
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] > 127:
+                data[i][j] = 127
+            elif data[i][j] < 0:
+                data[i][j] = 0
+    return data
 
-def orch_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
-    """Method to convert orchestra tensor to midi
-    
-    Arguments:
-        data {np.array} -- orchestration matrix
-    
-    Keyword Arguments:
-        output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
-    """
+def inst_to_midi(data, inst):
+    data = filter(data)
+    output_path=os.path.join(base_path, base_path + "/Orchestration/out/{}.mid".format(inst))
+    write_midi({inst: data}, 8, output_path)
 
+def orch_to_midi(data):
+    output_path=os.path.join(base_path, base_path + "/Orchestration/out/piano.mid")
     write_midi(data, 8, output_path)
 
-
-def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
-    """Helper to convert piano matrix to midi
-    
-    Arguments:
-        data {np.array} -- piano roll matrix
-    
-    Keyword Arguments:
-        output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
-    """
-
+def piano_to_midi(data):
+    data = filter(data)
+    output_path=os.path.join(base_path, base_path + "/Orchestration/out/piano.mid")
     write_midi({"Kboard": data}, 8, output_path)
 
 
