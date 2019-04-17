@@ -11,10 +11,10 @@ from Orchestration import data_path, base_path
 
 def get_train_data(source="bouliane_aligned"):
     """Method for getting training data for machine learning
-    
+
     Keyword Arguments:
         source {str} -- which folder you want the data from (default: {"bouliane_aligned"})
-    
+
     Returns:
         dict -- the training data
     """
@@ -30,21 +30,22 @@ def get_train_data(source="bouliane_aligned"):
         y = []
         for point in os.listdir(cashe):
             point_path = os.path.join(cashe, point)
-            for score in os.listdir(point_path):
-                with open(os.path.join(point_path, score), "rb") as f:
-                    part = pickle.load(f)
-                    # Have to correct for some piano scores having more than 1 piano part
-                    if "solo" in os.path.join(point_path, score):
-                        total = None
-                        for key in part:
-                            if total is None:
-                                total = part[key]
-                            else:
-                                np.add(total, part[key])
-                        part = {"Kboard": total}
-                        X.append(total)
-                    else:
-                        y.append(part)
+            if not "." in point[0]:
+                for score in os.listdir(point_path):
+                    with open(os.path.join(point_path, score), "rb") as f:
+                        part = pickle.load(f)
+                        # Have to correct for some piano scores having more than 1 piano part
+                        if "solo" in os.path.join(point_path, score):
+                            total = None
+                            for key in part:
+                                if total is None:
+                                    total = part[key]
+                                else:
+                                    np.add(total, part[key])
+                            part = {"Kboard": total}
+                            X.append(total)
+                        else:
+                            y.append(part)
         y = matrix_orch(y)
         y = vectorize_orch(y)
         with open(os.path.join(base_path, "Orchestration/cashe/data"), "wb") as handle:
@@ -63,10 +64,10 @@ def orchestra_to_tensor(orch):
 
 def vectorize_orch(data):
     """Method to convert orchestra to a tensor
-    
+
     Arguments:
         data {dict} -- orchestra dictionary
-    
+
     Returns:
         np.array -- tensor representation of the orchestra
     """
@@ -92,7 +93,7 @@ def vectorize_orch(data):
 
 def matrix_orch(data):
     """Method that puts ALL the orchestra data into a matrix from the dictionary
-    
+
     Arguments:
         data {arr} -- orchestration array containing dictionaries
     """
@@ -121,10 +122,10 @@ def matrix_orch(data):
 
 def devectorize_orch(data):
     """converting orchestra tensor into a dictionary
-    
+
     Arguments:
         data {np.array} -- orchestra tensor
-    
+
     Returns:
         dict -- dictionary representation of orchestra
     """
@@ -133,10 +134,10 @@ def devectorize_orch(data):
         for i in range(len(mat)):
             mat[i].append(row[i * 128 : (i + 1) * 128])
             for j in range(len(mat[i][-1])):
-                mat[i][-1][j] *= 20
-                if mat[i][-1][j] < 0:
+                if mat[i][-1][j] < 10:
                     mat[i][-1][j] = 0
-                elif mat[i][-1][j] > 127:
+                mat[i][-1][j] *= 20
+                if mat[i][-1][j] > 127:
                     mat[i][-1][j] = 127
     mat = np.array(mat)
     mat = mat.astype(int)
@@ -149,10 +150,10 @@ def devectorize_orch(data):
 
 def orch_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
     """Method to convert orchestra tensor to midi
-    
+
     Arguments:
         data {np.array} -- orchestration matrix
-    
+
     Keyword Arguments:
         output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
     """
@@ -163,10 +164,10 @@ def orch_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.m
 
 def piano_to_midi(data, output_path=os.path.join(base_path, "Orchestration/temp.mid")):
     """Helper to convert piano matrix to midi
-    
+
     Arguments:
         data {np.array} -- piano roll matrix
-    
+
     Keyword Arguments:
         output_path {str} -- path where to write midi (default: {os.path.join(base_path, "Orchestration/temp.mid")})
     """
@@ -178,7 +179,7 @@ def cashe_data(path):
     """Method that cashes all the parsed midi files from a certain
     directory in the data set, and stores it in the similarly structured
     directory called cashe
-    
+
     Arguments:
         path {str} -- path to directory that contains a single data set
     """
@@ -212,7 +213,7 @@ def cashe_data(path):
 
 def cashe_order(order):
     """Method to cashe the order of instruments in orchestration
-    
+
     Arguments:
         order {list} -- order of instruments in orchestration
     """
@@ -223,7 +224,7 @@ def cashe_order(order):
 
 def read_order():
     """Helper method to get the order of instruments
-    
+
     Returns:
         list -- order of the instruments
     """

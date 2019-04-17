@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
+
 # C extensions
 *.so
 
@@ -126,7 +128,7 @@ LOP_database/visualization/**/*.csv
 LOP_database/visualization/**/*.zip
 
 # Data
-./Orchestration/cashe/data
+Orchestration/cashe/data
 
 *.pyc
 .DS_Store
