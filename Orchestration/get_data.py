@@ -69,28 +69,42 @@ def add_instruments(y):
                 shape = y[i][list(y[i].keys())[0]].shape
                 y[i][inst] = np.zeros(shape)
 
-def filter(data):
+def filter(data, n_lines=None):
     data = data.astype(int)
-    for i in range(len(data)):
-        for j in range(len(data[i])):
-            if data[i][j] > 127:
-                data[i][j] = 127
-            elif data[i][j] < 0:
-                data[i][j] = 0
+    if n_lines == None:
+        for i in range(len(data)):
+            for j in range(len(data[i])):
+                if data[i][j] > 127:
+                    data[i][j] = 127
+                elif data[i][j] < 0:
+                    data[i][j] = 0
+    else:
+        for i in range(len(data)):
+            argmax = data[i].argsort()[-1*n_lines:][::-1]
+            vals = {}
+            for j in argmax:
+                vals[j] = data[i][j]
+            data[i] = np.zeros(128)
+            for j in vals.keys():
+                data[i][j] = vals[j]
+                if data[i][j] > 127:
+                    data[i][j] = 127
+                elif data[i][j] < 10:
+                    data[i][j] = 0
     return data
 
 def inst_to_midi(data, inst):
-    data = filter(data)
+    data = filter(data, 2)
     output_path=os.path.join(base_path, base_path + "/Orchestration/out/{}.mid".format(inst))
     write_midi({inst: data}, 8, output_path)
 
 def orch_to_midi(data):
-    output_path=os.path.join(base_path, base_path + "/Orchestration/out/piano.mid")
+    output_path=os.path.join(base_path, base_path + "/Orchestration/out/orch.mid")
     write_midi(data, 8, output_path)
 
-def piano_to_midi(data):
+def piano_to_midi(data, name='piano'):
     data = filter(data)
-    output_path=os.path.join(base_path, base_path + "/Orchestration/out/piano.mid")
+    output_path=os.path.join(base_path, base_path + "/Orchestration/out/{}.mid".format(name))
     write_midi({"Kboard": data}, 8, output_path)
 
 

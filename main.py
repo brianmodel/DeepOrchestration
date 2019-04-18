@@ -9,8 +9,8 @@ from Orchestration import base_path
 X, y = get_train_data()
 rnn = MultipleRNN()
 # rnn.fit(X, y)
-data = X[10]
-original = y[10]["Flute 1"]
-inst_to_midi(original, "flute_orig")
+# data = X[10]
+original = y[10]["Celli Tutti"]
+inst_to_midi(original, "cello_orig")
 # piano_to_midi(data)
-# rnn.predict(X[10], "Flute1")
+rnn.predict(X[10], "CelliTutti")
