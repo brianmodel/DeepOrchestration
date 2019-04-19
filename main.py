@@ -57,31 +57,31 @@ if not os.path.isfile(os.path.join(base_path, "lstm_model.h5")):
     model.save("lstm_model.h5")
 
 
-model = load_model("lstm_model.h5")
-for i in range(10):
-    for i in range(min(len(X), len(y))):
-        print("---------------")
-        print("training on song: " + str(i))
-        tempX = X[i]
-        tempY = y[i]
-        print(len(tempX))
-        print(len(tempY))
-        if len(tempY) < len(tempX):
-            tempX = tempX[:len(tempY)-len(tempX)]
-        if len(tempY) > len(tempX):
-            tempY = tempY[:len(tempX)-len(tempY)]
-        print(len(tempX))
-        print(len(tempY))
-        train(model, tempX, tempY, 15)
+# model = load_model("lstm_model.h5")
+# for i in range(10):
+#     for i in range(min(len(X), len(y))):
+#         print("---------------")
+#         print("training on song: " + str(i))
+#         tempX = X[i]
+#         tempY = y[i]
+#         print(len(tempX))
+#         print(len(tempY))
+#         if len(tempY) < len(tempX):
+#             tempX = tempX[:len(tempY)-len(tempX)]
+#         if len(tempY) > len(tempX):
+#             tempY = tempY[:len(tempX)-len(tempY)]
+#         print(len(tempX))
+#         print(len(tempY))
+#         train(model, tempX, tempY, 15)
 
-model.save("lstm_model.h5")
+# model.save("lstm_model.h5")
 
 
-# X = X[7]
-# y = y[7]
-# preds = predict(X)
-# piano_to_midi(X, os.path.join(base_path, "Orchestration/test.mid"))
-# orch_to_midi(preds, os.path.join(base_path, "Orchestration/pred.mid"))
-# orch_to_midi(y, os.path.join(base_path, "Orchestration/original_orch.mid"))
+X = X[7]
+y = y[7]
+preds = predict(X)
+piano_to_midi(X, os.path.join(base_path, "Orchestration/test.mid"))
+orch_to_midi(preds, os.path.join(base_path, "Orchestration/pred.mid"))
+orch_to_midi(y, os.path.join(base_path, "Orchestration/original_orch.mid"))
 
 
