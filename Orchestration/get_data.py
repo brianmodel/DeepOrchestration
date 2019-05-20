@@ -95,6 +95,11 @@ def filter(data, n_lines=None):
 
 def inst_to_midi(data, inst):
     data = filter(data, 2)
+    # with open('temp.txt', 'a') as f:
+    #     f.write("BEGIN")
+    #     for line in data:
+    #         f.write(str(line))
+    #     f.write("END")
     output_path=os.path.join(base_path, base_path + "/Orchestration/out/{}.mid".format(inst))
     write_midi({inst: data}, 8, output_path)
 
