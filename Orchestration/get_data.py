@@ -36,7 +36,7 @@ def get_train_data(source="bouliane_aligned", fix=True):
                         if total is None:
                             total = part[key]
                         else:
-                            np.add(total, part[key])
+                            total = np.add(total, part[key])
                     part = {"Kboard": total}
                     X.append(total)
                 else:

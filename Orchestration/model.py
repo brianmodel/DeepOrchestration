@@ -17,6 +17,14 @@ from keras.layers import LSTM, Dropout
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint
 
+'''
+TODO
+
+Create different models:
+encoder-decoder RNN
+RNN-RBM (http://danshiebler.com/2016-08-17-musical-tensorflow-part-two-the-rnn-rbm/)
+RNN-DBN (similar to RNN-RBM)
+'''
 
 class MultipleRNN:
     def __init__(self):
@@ -29,15 +37,18 @@ class MultipleRNN:
                 y_inst.append(orch[inst])
             self.train(inst, X, y_inst)
 
-    def predict(self, X, inst=None):
+    def predict(self, X, inst=None, save=True):
         if inst != None:
             model = load_model(base_path + "/Orchestration/models/{}.h5".format(inst))
             X = X.reshape(X.shape[0], 1, 128)
             preds = model.predict(X)
             preds = preds.reshape(preds.shape[0], preds.shape[2])
-            inst_to_midi(preds, inst)
         else:
             pass
+        if save:
+            inst_to_midi(preds, inst)
+        else:
+            return preds
 
     def train(self, inst, X, y):
         model = MultipleRNN._new_model_factory()
