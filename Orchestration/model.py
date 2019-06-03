@@ -78,10 +78,12 @@ class MultipleRNN:
 
     @staticmethod
     def _new_model_factory():
+        # TODO Play around with values
         model = Sequential()
         model.add(LSTM(30, input_shape=(1, 128), return_sequences=True))
         model.add(Dense(30, activation="relu"))
         model.add(Dense(128, activation="linear"))
+        # Lower rate
         model.add(Dropout(rate=0.5))
         model.compile(loss="mse", optimizer="adam", metrics=["accuracy"])
         return model
