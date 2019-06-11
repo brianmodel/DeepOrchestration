@@ -46,8 +46,8 @@ def get_train_data(source="bouliane_aligned", fix=True):
                             correct_inst = inst_mapping[inst]
                             if correct_inst in corrected_part:
                                 corrected_part[correct_inst] = np.add(part[inst], corrected_part[correct_inst])
-                                if corrected_part[correct_inst] > 127:
-                                    corrected_part[correct_inst] = 127
+                                indices = corrected_part[correct_inst] > 127
+                                corrected_part[correct_inst][indices] = 127
                             else:
                                 corrected_part[correct_inst] = part[inst]
                     y.append(corrected_part)
