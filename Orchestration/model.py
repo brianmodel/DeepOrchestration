@@ -17,14 +17,15 @@ from keras.layers import LSTM, Dropout
 from keras.models import load_model
 from keras.callbacks import ModelCheckpoint
 
-'''
+"""
 TODO
 
 Create different models:
-encoder-decoder RNN
+encoder-decoder RNN (https://arxiv.org/abs/1811.12408, https://towardsdatascience.com/representing-music-with-word2vec-c3c503176d52, https://arxiv.org/abs/1706.09088)
 RNN-RBM (http://danshiebler.com/2016-08-17-musical-tensorflow-part-two-the-rnn-rbm/)
 RNN-DBN (similar to RNN-RBM)
-'''
+"""
+
 
 class MultipleRNN:
     def __init__(self):

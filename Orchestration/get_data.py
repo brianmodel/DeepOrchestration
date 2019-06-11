@@ -6,7 +6,7 @@ import torch
 
 from Orchestration.midi.read_midi import Read_midi
 from Orchestration.midi.write_midi import write_midi
-from Orchestration import data_path, base_path
+from Orchestration import data_path, base_path, inst_mapping
 
 
 def get_train_data(source="bouliane_aligned", fix=True):
@@ -40,7 +40,17 @@ def get_train_data(source="bouliane_aligned", fix=True):
                     part = {"Kboard": total}
                     X.append(total)
                 else:
-                    y.append(part)
+                    corrected_part = {}
+                    for inst in part:
+                        if inst in inst_mapping:
+                            correct_inst = inst_mapping[inst]
+                            if correct_inst in corrected_part:
+                                corrected_part[correct_inst] = np.add(part[inst], corrected_part[correct_inst])
+                                if corrected_part[correct_inst] > 127:
+                                    corrected_part[correct_inst] = 127
+                            else:
+                                corrected_part[correct_inst] = part[inst]
+                    y.append(corrected_part)
     # Fixing the imperfections in the data
     for i in range(len(X)):
         inst = y[i][list(y[i].keys())[0]]
