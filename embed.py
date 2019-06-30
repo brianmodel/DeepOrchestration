@@ -11,16 +11,16 @@ import multiprocessing
 
 data = DataIterator('/home/brian/data/130000_Pop_Rock_Classical_Videogame_EDM_MIDI_Archive[6_19_15]/Classical_Piano_piano-midi.de_MIDIRip/')
 
+#data = DataIterator(
+#    "/Users/brianmodel/Downloads/130000_Pop_Rock_Classical_Videogame_EDM_MIDI_Archive[6_19_15]/Classical_Piano_piano-midi.de_MIDIRip/sinding"
+#)
+
 print("BEFORE")
 model = Word2Vec(sentences=data, size=500, window=5, negative=10, workers=multiprocessing.cpu_count())
 print("AFTER")
-model.save("word2vec.model")
+model.save("word2vec_nooctive.model")
 
-# base_dir = "/Users/brianmodel/Downloads/130000_Pop_Rock_Classical_Videogame_EDM_MIDI_Archive[6_19_15]/Classical_Piano_piano-midi.de_MIDIRip/"
-# for path in Path(base_dir).glob("**/*.mid"):
-# transposed = transpose(path)
-# transposed = transposed.chordify()
-# pr = stream_to_pr(transposed)
+# model = Word2Vec.load("word2vec.model")
+# print(model["G3"])
+# print(model.most_similar("G3"))
 
-# print(path)
-# print(tokenize(path))
