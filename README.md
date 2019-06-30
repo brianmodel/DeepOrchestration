@@ -1,9 +1,3 @@
----
-title: "Automatic Orchestration through LSTMs"
-date: "April 2019"
-author: Brian Model
----
-
 # Inspiration
 
 Inspired by, and using data from, this paper: 
