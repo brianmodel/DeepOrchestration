@@ -61,7 +61,9 @@ def stream_to_tokens(stream):
         quant = ""
         if isinstance(element, music21.chord.Chord):
             for note in element:
-                quant += str(note.pitch)
+                if str(note.pitch)[:-1] not in quant:
+                    quant += str(note.pitch)[:-1]
+                    print(quant)
         else:
             quant += str(element.pitch)
         if quant != "":
