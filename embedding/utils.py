@@ -73,7 +73,6 @@ def stream_to_tokens(stream):
         if quant != "":
             tokens.append(quant.strip())
             # tokens.append(quant)
-    print(tokens)
     return tokens
 
 
