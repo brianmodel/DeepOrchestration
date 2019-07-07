@@ -8,6 +8,11 @@ from Orchestration.midi.read_midi import Read_midi
 from Orchestration.midi.write_midi import write_midi
 from Orchestration import data_path, base_path, inst_mapping
 
+from embedding.utils import transpose
+from pathlib import Path
+import music21
+from music21.interval import Interval
+from music21.pitch import Pitch
 
 def get_train_data(source="bouliane_aligned", fix=True):
     """Method for getting training data for machine learning
@@ -65,7 +70,38 @@ def get_train_data(source="bouliane_aligned", fix=True):
     if fix:
         add_instruments(y)
     return X, y
+ 
 
+def get_str_data(source='bouliane_aligned'):
+    X = []
+    y = []
+    path = os.path.join(base_path, "data/" + source)
+
+    for point in os.listdir(path):
+        point_path = os.path.join(source, point)
+        if point_path[-9:] == ".DS_Store":
+            continue
+        songs = []
+        for song in Path(path+"/"+point).glob("*.mid"):
+            songs.append(str(song))
+        if "solo" in songs[0]:
+            solo = songs[0]
+            orch = songs[1]
+        else:
+            solo = songs[1]
+            orch = songs[0]
+
+        solo_score = music21.converter.parse(solo)
+        key = solo_score.analyze("key")
+
+        if key.mode == "minor":
+            i = Interval(key.tonic, Pitch("A"))
+        else:
+            i = Interval(key.tonic, Pitch("C"))
+        # solo = solo_score.transpose(i)
+        # print(solo)
+        orch_score = music21.converter.parse(orch)
+        # print(orch)
 
 def add_instruments(y):
     instruments = set()

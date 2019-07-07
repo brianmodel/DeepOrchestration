@@ -7,16 +7,23 @@ from Orchestration.get_data import (
     piano_to_midi,
     inst_to_midi,
     cashe_data,
+    get_str_data,
 )
 from Orchestration.model import MultipleRNN
 from Orchestration import base_path
 
+import music21
+
+path = "/Users/brianmodel/Desktop/gatech/VIP/DeepOrchestration/data/bouliane_aligned/0/Brahms_Symph4_iv(1-33)_ORCH+REDUC+piano_orch.mid"
+score = music21.converter.parse(path)
+
+print("DONE")
 # X, y = get_train_data(source="hand_picked_Spotify", fix=False)
-X, y = get_train_data()
+# X, y = get_str_data()
 # print(y[10].keys())
 # raise
-rnn = MultipleRNN()
-rnn.fit(X, y)
+# rnn = MultipleRNN()
+# rnn.fit(X, y)
 # data = X[10]
 # print(y[10].keys())
 # raise

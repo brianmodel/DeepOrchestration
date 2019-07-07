@@ -4,6 +4,7 @@ from music21.pitch import Pitch
 import numpy as np
 
 from Orchestration.midi.write_midi import write_midi
+from embedding import note_mapping
 
 
 def tokenize(file):
@@ -61,13 +62,18 @@ def stream_to_tokens(stream):
         quant = ""
         if isinstance(element, music21.chord.Chord):
             for note in element:
-                if str(note.pitch)[:-1] not in quant:
-                    quant += str(note.pitch)[:-1]
-                    print(quant)
+                mapped = str(note_mapping.get(str(note.pitch)[:-1], -1))
+                if mapped not in quant:
+                    quant += mapped + " "
+                # if str(note.pitch)[:-1] not in quant:
+                #     quant += str(note.pitch)[:-1]
         else:
-            quant += str(element.pitch)
+            quant += str(note_mapping.get(str(note.pitch)[:-1], -1)) + " "
+            # quant += str(element.pitch)
         if quant != "":
-            tokens.append(quant)
+            tokens.append(quant.strip())
+            # tokens.append(quant)
+    print(tokens)
     return tokens
 
 
@@ -82,3 +88,21 @@ def note_to_index(note):
         elif note[1] == "#":
             index += 1
     return index
+
+
+def index_to_note(index):
+    pass
+
+
+def embedded(model, chord):
+    if in_vocab(model, chord):
+        return model.wv[chord]
+    else:
+        return model.wv.vectors.mean(0)
+
+
+def in_vocab(model, word):
+    if word in model:
+        return True
+
+    return False
