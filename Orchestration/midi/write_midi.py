@@ -16,7 +16,7 @@ def write_midi(pr, ticks_per_beat, write_path, tempo=80):
         list_event = []
         for t in range(T):
             pr_t = pr[t]
-            mask = (pr_t != pr_tm1)
+            mask = pr_t != pr_tm1
             if (mask).any():
                 for n in range(N):
                     if mask[n]:
@@ -28,6 +28,7 @@ def write_midi(pr, ticks_per_beat, write_path, tempo=80):
                         list_event.append((pitch, velocity, t_event))
             pr_tm1 = pr_t
         return list_event
+
     # Tempo
     microseconds_per_beat = mido.bpm2tempo(tempo)
     # Write a pianoroll in a midi file
@@ -41,7 +42,7 @@ def write_midi(pr, ticks_per_beat, write_path, tempo=80):
         # transform the matrix in a list of (pitch, velocity, time)
         events = pr_to_list(matrix)
         # Tempo
-        track.append(mido.MetaMessage('set_tempo', tempo=microseconds_per_beat))
+        track.append(mido.MetaMessage("set_tempo", tempo=microseconds_per_beat))
         # Add the program_change
         try:
             program = program_change_mapping[instrument_name]
@@ -51,7 +52,7 @@ def write_midi(pr, ticks_per_beat, write_path, tempo=80):
             # print "Default value is 1 (piano)"
             # print "Check acidano/data_processing/utils/program_change_mapping.py"
             program = 1
-        track.append(mido.Message('program_change', program=program))
+        track.append(mido.Message("program_change", program=program))
 
         # This list is required to shut down
         # notes that are on, intensity modified, then off only 1 time
@@ -65,14 +66,20 @@ def write_midi(pr, ticks_per_beat, write_path, tempo=80):
             pitch, velocity, time = event
             if velocity == 0:
                 # Get the channel
-                track.append(mido.Message('note_off', note=pitch, velocity=0, time=time))
+                track.append(
+                    mido.Message("note_off", note=pitch, velocity=0, time=time)
+                )
                 notes_on_list.remove(pitch)
             else:
                 if pitch in notes_on_list:
-                    track.append(mido.Message('note_off', note=pitch, velocity=0, time=time))
+                    track.append(
+                        mido.Message("note_off", note=pitch, velocity=0, time=time)
+                    )
                     notes_on_list.remove(pitch)
                     time = 0
-                track.append(mido.Message('note_on', note=pitch, velocity=velocity, time=time))
+                track.append(
+                    mido.Message("note_on", note=pitch, velocity=velocity, time=time)
+                )
                 notes_on_list.append(pitch)
     mid.save(write_path)
     return

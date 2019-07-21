@@ -11,3 +11,4 @@ This study accumulated several datasets of piano and corresponding orchestral sc
 
 ## Models
 Our repo contains two types of sequence-to-sequence machine learning models. On the **naveen2** branch, there is a model which uses a single RNN to read in the piano score data directly and generate an orchestral mapping, while the **multipleRNN** branch contains a model which is being trained on an instrument specific basis, with individual RNNs mapping each part in the orchestra.
+# Inspiration
