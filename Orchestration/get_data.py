@@ -13,6 +13,9 @@ from pathlib import Path
 import music21
 from music21.interval import Interval
 from music21.pitch import Pitch
+from scipy.ndimage.interpolation import shift
+from gensim.models import Word2Vec
+from embedding.utils import embedded
 
 def get_train_data(source="bouliane_aligned", fix=True):
     """Method for getting training data for machine learning
@@ -76,6 +79,7 @@ def get_str_data(source='bouliane_aligned'):
     X = []
     y = []
     path = os.path.join(base_path, "data/" + source)
+    embedding = Word2Vec.load("/Users/brianmodel/Desktop/gatech/VIP/DeepOrchestration/word2vec_nooctive_enharmonic.model")
 
     for point in os.listdir(path):
         point_path = os.path.join(source, point)
@@ -98,10 +102,90 @@ def get_str_data(source='bouliane_aligned'):
             i = Interval(key.tonic, Pitch("A"))
         else:
             i = Interval(key.tonic, Pitch("C"))
-        # solo = solo_score.transpose(i)
-        # print(solo)
-        orch_score = music21.converter.parse(orch)
-        # print(orch)
+        semitones = i.chromatic.semitones
+        solo_data = Read_midi(
+            solo, 8
+        ).read_file()
+
+        # Correct the data
+        total = None
+        for key in solo_data:
+            if total is None:
+                total = solo_data[key]
+            else:
+                total = np.add(total, solo_data[key])
+        
+        if semitones != 0:
+            total = transpose_solo_pr(total, semitones)
+        tokens = pr_to_tokens(total)
+
+        orch_data = Read_midi(
+            orch, 8
+        ).read_file()
+
+        orch_data = fix_orch_pr(orch_data)
+        if semitones != 0:
+            orch_data = tranpose_orch_pr(orch_data, semitones)
+        # orch_pr_to_tokens(orch_data)
+        y.append(orch_data)
+
+        # Make sure the lengths are the same
+        for i in range(len(tokens)):
+            inst = orch_data[list(orch_data.keys())[0]]
+            if len(tokens) != len(inst):
+                diff = abs(len(inst) - len(tokens))
+                if len(tokens) < len(inst):
+                    for j in range(diff):
+                        tokens.append(tokens[-1])
+                else:
+                    tokens = tokens[:len(tokens)-diff]
+
+        # Convert to embedded vectors
+        embedded_tokens = np.empty((0, 300))
+        for i in range(len(tokens)):
+            embedded_tokens = np.append(embedded_tokens, embedded(embedding, tokens[i]).reshape((1, 300)), axis=0)
+        embedded_tokens = embedded_tokens.reshape(embedded_tokens.shape[0], 1, 300)
+        X.append(embedded_tokens)
+    return X, y
+
+def transpose_solo_pr(pr, semitones):
+    for i in range(len(pr)):
+        pr[i] = shift(pr[i], semitones)
+    return pr
+
+def fix_orch_pr(pr):
+    corrected_part = {}
+    for inst in pr:
+        if inst in inst_mapping:
+            correct_inst = inst_mapping[inst]
+            if correct_inst in corrected_part:
+                corrected_part[correct_inst] = np.add(pr[inst], corrected_part[correct_inst])
+                indices = corrected_part[correct_inst] > 127
+                corrected_part[correct_inst][indices] = 127
+            else:
+                corrected_part[correct_inst] = pr[inst]
+    return corrected_part
+
+def tranpose_orch_pr(pr, semitones):
+    for inst in pr:
+        pr[inst] = transpose_solo_pr(pr[inst], semitones)
+    return pr
+
+def pr_to_tokens(pr):
+    tokens = []
+    for quant in pr:
+        chord = ""
+        notes = np.nonzero(quant)
+        for note in notes[0]:
+            val = str(int(note)%12)
+            if val not in chord:
+                chord += str(int(note)%12) + ' '
+        tokens.append(chord.strip())
+    return tokens
+
+def orch_pr_to_tokens(pr):
+    for inst in pr:
+        pr[inst] = pr_to_tokens(pr[inst])
 
 def add_instruments(y):
     instruments = set()

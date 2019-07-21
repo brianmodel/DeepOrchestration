@@ -14,9 +14,3 @@ class DataIterator:
     def __iter__(self):
         for song in Path(self.path).glob("**/*.mid"):
             yield tokenize(song)
-
-
-# data = DataIterator(
-#     "/Users/brianmodel/Downloads/130000_Pop_Rock_Classical_Videogame_EDM_MIDI_Archive[6_19_15]/Classical_Piano_piano-midi.de_MIDIRip"
-# )
-

@@ -6,9 +6,23 @@ data_path = join(dirname(dirname(abspath(__file__))), "data")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Mapping of instruments to eliminate redundencies
 # All unique instruments:
-# {'Trumpet', 'BassClarinet', 'Flute', 'Trombone', 'Violin',
-# 'Oboe', 'Bassoon', 'Harp', 'DoubleBass', 'Clarinet', 'Cello',
-# 'Tuba', 'Percussion', 'Viola', 'Horn'}
+instruments = [
+    "Trumpet",
+    "BassClarinet",
+    "Flute",
+    "Trombone",
+    "Violin",
+    "Oboe",
+    "Bassoon",
+    "Harp",
+    "DoubleBass",
+    "Clarinet",
+    "Cello",
+    "Tuba",
+    "Percussion",
+    "Viola",
+    "Horn",
+]
 
 inst_mapping = {
     "Flute 2": "Flute",

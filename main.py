@@ -9,17 +9,22 @@ from Orchestration.get_data import (
     cashe_data,
     get_str_data,
 )
-from Orchestration.model import MultipleRNN
+from Orchestration.model import MultipleRNN, EmbeddedRNN
 from Orchestration import base_path
 
 import music21
 
-path = "/Users/brianmodel/Desktop/gatech/VIP/DeepOrchestration/data/bouliane_aligned/0/Brahms_Symph4_iv(1-33)_ORCH+REDUC+piano_orch.mid"
-score = music21.converter.parse(path)
+# path = "/Users/brianmodel/Desktop/gatech/VIP/DeepOrchestration/data/bouliane_aligned/0/Brahms_Symph4_iv(1-33)_ORCH+REDUC+piano_orch.mid"
+# score = music21.converter.parse(path)
 
-print("DONE")
+# print("DONE")
 # X, y = get_train_data(source="hand_picked_Spotify", fix=False)
-# X, y = get_str_data()
+# print(y)
+print("Loading data...")
+X, y = get_str_data()
+print("Data loaded successfully!")
+model = EmbeddedRNN()
+model.fit(X, y)
 # print(y[10].keys())
 # raise
 # rnn = MultipleRNN()

@@ -65,14 +65,10 @@ def stream_to_tokens(stream):
                 mapped = str(note_mapping.get(str(note.pitch)[:-1], -1))
                 if mapped not in quant:
                     quant += mapped + " "
-                # if str(note.pitch)[:-1] not in quant:
-                #     quant += str(note.pitch)[:-1]
         else:
             quant += str(note_mapping.get(str(note.pitch)[:-1], -1)) + " "
-            # quant += str(element.pitch)
         if quant != "":
             tokens.append(quant.strip())
-            # tokens.append(quant)
     return tokens
 
 
@@ -89,13 +85,11 @@ def note_to_index(note):
     return index
 
 
-def index_to_note(index):
-    pass
-
-
 def embedded(model, chord):
     if in_vocab(model, chord):
         return model.wv[chord]
+    elif chord == "":
+        return np.zeros(300)
     else:
         return model.wv.vectors.mean(0)
 
@@ -103,5 +97,4 @@ def embedded(model, chord):
 def in_vocab(model, word):
     if word in model:
         return True
-
     return False
