@@ -79,7 +79,7 @@ def get_str_data(source='bouliane_aligned'):
     X = []
     y = []
     path = os.path.join(base_path, "data/" + source)
-    embedding = Word2Vec.load("/Users/brianmodel/Desktop/gatech/VIP/DeepOrchestration/word2vec_nooctive_enharmonic.model")
+    embedding = Word2Vec.load(base_path+"/word2vec_nooctive_enharmonic.model")
 
     for point in os.listdir(path):
         point_path = os.path.join(source, point)
